@@ -22,3 +22,4 @@ if __name__ == '__main__':
     ret = chat.stream_answer("请介绍中文")
     for token in ret:
         print(token.content, end="", flush=True)
+

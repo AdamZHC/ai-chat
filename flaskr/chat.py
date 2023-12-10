@@ -25,5 +25,6 @@ def chat_stream():
         'Cache-Control': 'no-cache',
         'X-Accel-Buffering': 'no',
     }
+
     return Response(generate(), mimetype="text/event-stream", headers=headers)
 

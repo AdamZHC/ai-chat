@@ -9,17 +9,8 @@ os.environ["https_proxy"] = "http://127.0.0.1:33210"
 API_KEY = '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'
 
 from langchain.chat_models import ChatAnthropic
-from langchain.prompts.chat import (
-    ChatPromptTemplate,
-    SystemMessagePromptTemplate,
-    AIMessagePromptTemplate,
-    HumanMessagePromptTemplate,
-)
-from langchain.schema import (
-    AIMessage,
-    HumanMessage,
-    SystemMessage
-)
+
+
 
 if __name__ == '__main__':
     # llm = OpenAI(max_tokens=1024, openai_api_key=API_KEY)
