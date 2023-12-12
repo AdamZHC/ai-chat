@@ -1,6 +1,7 @@
 import os
 from langchain.llms import OpenAI
 from langchain.chat_models import ChatOpenAI
+from langchain.prompts import PromptTemplate
 
 
 os.environ["http_proxy"] = "http://127.0.0.1:33210"
@@ -15,10 +16,10 @@ from langchain.chat_models import ChatAnthropic
 if __name__ == '__main__':
     # llm = OpenAI(max_tokens=1024, openai_api_key=API_KEY)
     # print(llm.predict("请你介绍“中文”"))
-    chat = ChatAnthropic()
+    # chat = ChatAnthropic()
 
     # steaming
-    llm = ChatOpenAI(streaming=True, max_tokens=2048,
+    llm = ChatOpenAI(max_tokens=2048,
                      openai_api_key='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')
 
     # prompt = ChatPromptTemplate.from_messages(
@@ -26,9 +27,12 @@ if __name__ == '__main__':
     # )
 
     # llm_chain = prompt | llm
+    one_input_prompt = PromptTemplate(input_variables=["adjective"], template="Tell me a {adjective} joke.")
+    prompt = one_input_prompt.format(adjective="funny")
 
-    ret = llm.stream("你好")
-    for token in ret:
-        print()
-        print(token.content, end="", flush=True)
-    print()
+    ret = llm.predict(prompt)
+    print(ret)
+    # for token in ret:
+    #     print()
+    #     print(token.content, end="", flush=True)
+    # print()
