@@ -4,9 +4,6 @@ from langchain.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 
 
-os.environ["http_proxy"] = "http://127.0.0.1:33210"
-os.environ["https_proxy"] = "http://127.0.0.1:33210"
-
 API_KEY = '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'
 
 from langchain.chat_models import ChatAnthropic

@@ -4,14 +4,15 @@ from flaskr.chatm import Prompted
 from flaskr.config import ConfigRead
 
 
+
 class BaseChatModel(ConfigRead.ConfigReader):
     # 初始化
     def __init__(self, stream=True):
         super().__init__()
         self.__API_KEY__ = self.property("api_key")
         self.__DEFAULT_TOKEN__ = self.property("token")
-        os.environ["http_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
-        os.environ["https_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
+        # os.environ["http_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
+        # os.environ["https_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
         self.__init_model__(stream)
     def __init_model__(self, stream=True):
         self.__llm__ = ChatOpenAI(max_tokens=self.__DEFAULT_TOKEN__, openai_api_key=self.__API_KEY__, streaming=stream)
@@ -50,6 +51,8 @@ class FixedTemplateChatModel(BaseChatModel, Prompted.SingletonPrompted):
 
 
 if __name__ == '__main__':
+    import sys
+    sys.path.append('../../../ai-chat')
     chat = FixedTemplateChatModel("请介绍{language}",['language'])
     ret = chat.stream_answer(language='英文')
     for token in ret:
