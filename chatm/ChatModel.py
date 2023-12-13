@@ -36,20 +36,25 @@ class MultiTemplateChatModel(BaseChatModel, Prompted.StaticPrompted):
 
 class FixedTemplateChatModel(BaseChatModel, Prompted.SingletonPrompted):
     def __init__(self, template, input_variables, stream=True):
-        super(BaseChatModel).__init__(stream)
-        super(Prompted.SingletonPrompted).__init__(template, input_variables)
+        BaseChatModel.__init__(self, stream)
+        Prompted.SingletonPrompted.__init__(self, template, input_variables)
+    def text(self, **kwargs):
+        return self.message_from_prompt(**kwargs)
     # 提示词构造 父类实现提示词构造
     def answer(self, **kwargs) -> str:
-        text = self.__template__(**kwargs)
+        text = self.text(**kwargs)
         return self.predict(text)
     def stream_answer(self, **kwargs):
-        text = self.__template__(**kwargs)
+        text = self.text(**kwargs)
         return self.stream_predict(text)
 
 
 if __name__ == '__main__':
-    chat = BaseChatModel()
-    ret = chat.stream_predict("请介绍中文")
+    chat = FixedTemplateChatModel("请介绍{language}",['language'])
+    ret = chat.stream_answer(language='英文')
+    for token in ret:
+        print(token.content, end="", flush=True)
+    ret = chat.stream_answer(language='法语')
     for token in ret:
         print(token.content, end="", flush=True)
 
