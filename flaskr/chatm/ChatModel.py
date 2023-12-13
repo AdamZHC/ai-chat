@@ -1,7 +1,7 @@
 import os
 from langchain.chat_models import ChatOpenAI
-from chatm import Prompted
-from config import ConfigRead
+from flaskr.chatm import Prompted
+from flaskr.config import ConfigRead
 
 
 class BaseChatModel(ConfigRead.ConfigReader):
