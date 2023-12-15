@@ -5,7 +5,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 from flaskr.chatm import (
-    Prompted, Memory, ModelFactory
+    prompted, memory, mfactory
 )
 import asyncio
 from langchain.callbacks import AsyncIteratorCallbackHandler
@@ -50,13 +50,13 @@ class BaseChatModel(InitializedChatModel):
 
     def __callable__(self):
         if not self.__callable_obj__:
-            self.__callable_obj__ = ModelFactory.InstanceUtil.new_chat(
+            self.__callable_obj__ = mfactory.InstanceUtil.new_chat(
                 max_tokens=self.__DEFAULT_TOKEN__,
                 openai_api_key=self.__API_KEY__,
                 streaming=self.__STREAM_MARK__)
         if self.__STREAM_MARK__:
             self.__call_back__ = AsyncIteratorCallbackHandler()
-            self.__callable_obj__ = ModelFactory.InstanceUtil.copy_chat(
+            self.__callable_obj__ = mfactory.InstanceUtil.copy_chat(
                 src=self.__callable_obj__, callback=self.__call_back__
             )
         return self.__callable_obj__
@@ -77,7 +77,7 @@ class BaseChatModel(InitializedChatModel):
 class ChainChatModel(InitializedChatModel):
     def __callable__(self):
         if not self.__callable_obj__:
-            self.__callable_obj__ = ModelFactory.InstanceUtil.new_chain(
+            self.__callable_obj__ = mfactory.InstanceUtil.new_chain(
                 max_tokens=self.__DEFAULT_TOKEN__,
                 openai_api_key=self.__API_KEY__,
                 streaming=self.__STREAM_MARK__,
@@ -85,7 +85,7 @@ class ChainChatModel(InitializedChatModel):
             )
         if self.__STREAM_MARK__:
             self.__call_back__ = AsyncIteratorCallbackHandler()
-            self.__callable_obj__ = ModelFactory.InstanceUtil.copy_chain(
+            self.__callable_obj__ = mfactory.InstanceUtil.copy_chain(
                 src=self.__callable_obj__,
                 callback=self.__call_back__
             )
@@ -96,17 +96,17 @@ class ChainChatModel(InitializedChatModel):
         pass
 
 
-class MultiTemplateChainChatModel(BaseChatModel, Prompted.StaticPrompted):
+class MultiTemplateChainChatModel(BaseChatModel, prompted.StaticPrompted):
     def __callable__(self):
         if not self.__callable_obj__:
-            self.__callable_obj__ = ModelFactory.InstanceUtil.new_common_chain(
+            self.__callable_obj__ = mfactory.InstanceUtil.new_common_chain(
                 max_tokens=self.__DEFAULT_TOKEN__,
                 openai_api_key=self.__API_KEY__,
                 streaming=self.__STREAM_MARK__,
             )
         if self.__STREAM_MARK__:
             self.__call_back__ = AsyncIteratorCallbackHandler()
-            self.__callable_obj__ = ModelFactory.InstanceUtil.copy_common_chain(
+            self.__callable_obj__ = mfactory.InstanceUtil.copy_common_chain(
                 src=self.__callable_obj__,
                 callback=self.__call_back__
             )
@@ -118,13 +118,13 @@ class MultiTemplateChainChatModel(BaseChatModel, Prompted.StaticPrompted):
         return self._predict_(text)
 
 
-class FixedTemplateChainChatModel(ChainChatModel, Prompted.SingletonPrompted):
+class FixedTemplateChainChatModel(ChainChatModel, prompted.SingletonPrompted):
 
     def __init__(self, template, input_variables, stream=True):
         ChainChatModel.__init__(self, stream)
-        Prompted.SingletonPrompted.__init__(self,
-                                            Memory.MemoryUtil.add_prefix_template(template),
-                                            Memory.MemoryUtil.add_prefix_input_variables(input_variables))
+        prompted.SingletonPrompted.__init__(self,
+                                            memory.MemoryUtil.add_prefix_template(template),
+                                            memory.MemoryUtil.add_prefix_input_variables(input_variables))
 
     def _template_(self):
         return self.__template__

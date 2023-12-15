@@ -11,7 +11,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 from flaskr.chatm import (
-    Prompted, Memory
+    prompted, memory
 )
 import asyncio
 from langchain.callbacks import AsyncIteratorCallbackHandler

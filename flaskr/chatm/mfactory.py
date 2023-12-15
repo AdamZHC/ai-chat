@@ -2,7 +2,7 @@ from langchain.chains import LLMChain
 from langchain.memory import ConversationBufferMemory
 from langchain.chat_models import ChatOpenAI
 from flaskr.chatm import (
-    Memory
+    memory
 )
 
 
