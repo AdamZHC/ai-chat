@@ -27,3 +27,4 @@ class SingletonPrompted(BasePrompted):
     def message_from_prompt(self, **kwargs):
         return self.__template__.format(**kwargs)
 
+
