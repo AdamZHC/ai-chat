@@ -25,8 +25,11 @@ def chat_stream():
     threading.Thread(target=CoroutineTask,args=(content,q)).start()
     def generate():
         while True:
-            token = q.get(block = True, timeout = 5)
-            yield token
+            try:
+                token = q.get(block = True, timeout = 3)
+                yield token
+            except queue.Empty:
+                break
 
     headers = {
         'Content-Type': 'text/event-stream',
@@ -42,11 +45,10 @@ def CoroutineTask(content, q):
     # loop = asyncio.get_event_loop()
     loop.run_until_complete(f(content, q))
 
-
 async def f(content, q):
     chat_model = ChatModel.BaseChatModel()
     task, callback = chat_model.predict_(content)
     # chat = FixedTemplateChainChatModel("{text}", ['text']
     async for token in callback.aiter():
-        print(token, end="")
+        # print(token, end="")
         q.put(token)

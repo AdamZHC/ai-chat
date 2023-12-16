@@ -33,8 +33,8 @@ class InitializedChatModel(ChatModel, ConfigRead.ConfigReader):
         self.__DEFAULT_TOKEN__ = self.property("token")
         self.__STREAM_MARK__ = stream
         # 回调处理接口
-        os.environ["http_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
-        os.environ["https_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
+        # os.environ["http_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
+        # os.environ["https_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
         self.__callable_obj__ = None
 
     @abstractmethod
