@@ -28,7 +28,7 @@ class InstanceUtil:
                            streaming=streaming),
             prompt=prompt,
             verbose=True,
-            memory=ConversationBufferMemory(memory_key=Memory.MemoryUtil.MEMORY_KEY),
+            memory=ConversationBufferMemory(memory_key=memory.MemoryUtil.MEMORY_KEY),
         )
 
     @staticmethod
