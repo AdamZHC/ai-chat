@@ -1,4 +1,5 @@
 import os
+import atexit
 from abc import ABC, abstractmethod
 from langchain.chains import LLMChain
 from langchain.chains import ConversationChain
@@ -7,6 +8,7 @@ from langchain.chat_models import ChatOpenAI
 from flaskr.chatm import (
     prompted, memory, mfactory
 )
+from flaskr.serial import serial
 import asyncio
 from langchain.callbacks import AsyncIteratorCallbackHandler
 from flaskr.config import ConfigRead
@@ -81,8 +83,11 @@ class ChainChatModel(InitializedChatModel):
                 max_tokens=self.__DEFAULT_TOKEN__,
                 openai_api_key=self.__API_KEY__,
                 streaming=self.__STREAM_MARK__,
-                prompt=self._template_()
+                prompt=self._template_(),
+                memory_=ConversationBufferMemory(memory_key=memory.MemoryUtil.MEMORY_KEY)
             )
+            # 后置处理
+            self._post_()
         if self.__STREAM_MARK__:
             self.__call_back__ = AsyncIteratorCallbackHandler()
             self.__callable_obj__ = mfactory.InstanceUtil.copy_chain(
@@ -95,6 +100,10 @@ class ChainChatModel(InitializedChatModel):
     def _template_(self):
         pass
 
+    @abstractmethod
+    def _post_(self):
+        pass
+
 
 class MultiTemplateChainChatModel(BaseChatModel, prompted.StaticPrompted):
     def __callable__(self):
@@ -103,6 +112,7 @@ class MultiTemplateChainChatModel(BaseChatModel, prompted.StaticPrompted):
                 max_tokens=self.__DEFAULT_TOKEN__,
                 openai_api_key=self.__API_KEY__,
                 streaming=self.__STREAM_MARK__,
+                memory_=ConversationBufferMemory()
             )
         if self.__STREAM_MARK__:
             self.__call_back__ = AsyncIteratorCallbackHandler()
@@ -129,6 +139,9 @@ class FixedTemplateChainChatModel(ChainChatModel, prompted.SingletonPrompted):
     def _template_(self):
         return self.__template__
 
+    def _post_(self):
+        pass
+
     # 提示词构造 父类实现提示词构造
     def predict(self, **kwargs):
         m = self.__callable__()
@@ -139,16 +152,30 @@ class FixedTemplateChainChatModel(ChainChatModel, prompted.SingletonPrompted):
         else:
             return m.predict(**kwargs)
 
+class SerialChatModel(FixedTemplateChainChatModel, serial.Serializable):
+    def __init__(self, template, input_variables, stream=True):
+        atexit.register(self.serial)
+        FixedTemplateChainChatModel.__init__(self, template, input_variables, stream)
+
+    def _pass_(self):
+        self.__load__()
+    def __memorized__(self):
+        return self.__callable__().memory
+
+    def serial(self):
+        self.__dump__()
+
+
 
 async def f():
     # chat = FixedTemplateChainChatModel("{text}", ['text'])
-    chat = BaseChatModel()
-    task, callback = chat.predict_(text='请写一首五言藏头诗')
+    chatModel = BaseChatModel()
+    task, callback = chatModel.predict_(text='请写一首五言藏头诗')
     async for token in callback.aiter():
         print(token, end="")
     await task
 
-    task, callback = chat.predict_(text='请分析该诗的特点')
+    task, callback = chatModel.predict_(text='请分析该诗的特点')
     async for token in callback.aiter():
         print(token, end="")
     await task
@@ -162,6 +189,9 @@ async def f():
 
 
 if __name__ == '__main__':
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(f())
+    chat = SerialChatModel("{text}", ['text'], False)
+    chat.predict(text='please give me a random number')
+    chat.predict(text='please add number one')
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(f())
     # LLMChain()

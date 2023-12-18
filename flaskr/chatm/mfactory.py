@@ -21,14 +21,14 @@ class InstanceUtil:
                           callbacks=[callback])
 
     @staticmethod
-    def new_chain(max_tokens, openai_api_key, streaming, prompt):
+    def new_chain(max_tokens, openai_api_key, streaming, prompt, memory_):
         return LLMChain(
             llm=ChatOpenAI(max_tokens=max_tokens,
                            openai_api_key=openai_api_key,
                            streaming=streaming),
             prompt=prompt,
             verbose=True,
-            memory=ConversationBufferMemory(memory_key=memory.MemoryUtil.MEMORY_KEY),
+            memory=memory_,
         )
 
     @staticmethod
@@ -44,13 +44,13 @@ class InstanceUtil:
         )
 
     @staticmethod
-    def new_common_chain(max_tokens, openai_api_key, streaming):
+    def new_common_chain(max_tokens, openai_api_key, streaming, memory_):
         return LLMChain(
             llm=ChatOpenAI(max_tokens=max_tokens,
                            openai_api_key=openai_api_key,
                            streaming=streaming),
             verbose=True,
-            memory=ConversationBufferMemory(),
+            memory=memory_,
         )
 
     @staticmethod

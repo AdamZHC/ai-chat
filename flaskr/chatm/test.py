@@ -26,14 +26,14 @@ os.environ["http_proxy"] = "http://127.0.0.1:33210"
 os.environ["https_proxy"] = "http://127.0.0.1:33210"
 
 if __name__ == '__main__':
-    # llm = OpenAI(max_tokens=1024, openai_api_key=API_KEY)
+    llm = OpenAI(max_tokens=1024, openai_api_key=API_KEY)
     # print(llm.predict("请你介绍“中文”"))
     # chat = ChatAnthropic()
 
     # steaming
-    llm = OpenAI(max_tokens=2048,
-                     openai_api_key='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',
-                 streaming=True)
+    # llm = OpenAI(max_tokens=2048,
+    #                  openai_api_key='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',
+    #              streaming=True)
 
     # prompt = ChatPromptTemplate.from_messages(
     #     [("system", "你是一个专业的AI助手。"), ("human", "{query}")]
@@ -44,9 +44,9 @@ if __name__ == '__main__':
     # prompt = one_input_prompt.format(adjective="funny")
     # for token in ret:
     #     print(token.content, end="", flush=True)
-    m = LLMChain(llm=llm, callbacks=[StreamingStdOutCallbackHandler()], prompt=PromptTemplate(template="{text}", input_variables=['text']))
-    print(m)
-    m.callbacks = [AsyncIteratorCallbackHandler()]
-    print(m)
+    # m = LLMChain(llm=llm, callbacks=[StreamingStdOutCallbackHandler()], prompt=PromptTemplate(template="{text}", input_variables=['text']))
+    # print(m)
+    # m.callbacks = [AsyncIteratorCallbackHandler()]
+    # print(m)
 
 
