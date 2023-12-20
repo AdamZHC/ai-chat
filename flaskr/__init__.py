@@ -24,7 +24,7 @@ def create_app(test_config=None):
     app.register_blueprint(chat.bp, url_prefix='/chat')
 
     from . import analyse
-    app.register_blueprint(prompt.bp, url_prefix='/prompt')
+    app.register_blueprint(analyse.bp, url_prefix='/analyse')
 
     @app.route('/')
     def index():
