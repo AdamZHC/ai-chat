@@ -1,5 +1,6 @@
 import os
 import atexit
+import time
 from abc import ABC, abstractmethod
 from langchain.chains import LLMChain
 from langchain.chains import ConversationChain
@@ -84,7 +85,7 @@ class ChainChatModel(InitializedChatModel):
                 openai_api_key=self.__API_KEY__,
                 streaming=self.__STREAM_MARK__,
                 prompt=self._template_(),
-                memory_=ConversationBufferMemory(memory_key=memory.MemoryUtil.MEMORY_KEY)
+                memory_=self._memory_()
             )
             # 后置处理
             self._post_()
@@ -95,6 +96,9 @@ class ChainChatModel(InitializedChatModel):
                 callback=self.__call_back__
             )
         return self.__callable_obj__
+    @abstractmethod
+    def _memory_(self):
+        pass
 
     @abstractmethod
     def _template_(self):
@@ -141,6 +145,9 @@ class FixedTemplateChainChatModel(ChainChatModel, prompted.SingletonPrompted):
 
     def _post_(self):
         pass
+    def _memory_(self):
+        return ConversationBufferMemory(memory_key=memory.MemoryUtil.MEMORY_KEY)
+
 
     # 提示词构造 父类实现提示词构造
     def predict(self, **kwargs):
@@ -189,9 +196,16 @@ async def f():
 
 
 if __name__ == '__main__':
-    chat = SerialChatModel("{text}", ['text'], False)
+    chat = FixedTemplateChainChatModel("You are AI assistant now! Please answer my Question {text}", ['text'], False)
     chat.predict(text='please give me a random number')
+    # time.sleep(2)
     chat.predict(text='please add number one')
+    chat.predict(text='please add number one')
+    chat.predict(text='please add number one')
+    chat.predict(text='please add number one')
+    chat.predict(text='please add number one')
+    # chat.predict(text='please add number one again')
+    print(chat.__callable_obj__.memory)
     # loop = asyncio.get_event_loop()
     # loop.run_until_complete(f())
     # LLMChain()
