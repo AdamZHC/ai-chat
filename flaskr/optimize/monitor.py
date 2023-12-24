@@ -4,6 +4,9 @@ from flaskr.chatm.ChatModel import (
 from flaskr.chatm.memory import (
     MemoryUtil
 )
+from flaskr.chatm.mfactory import (
+    InstanceUtil
+)
 from abc import (
     ABC, abstractmethod
 )
@@ -15,8 +18,8 @@ class MemoryModifiable(ABC):
         pass
 
 class MemoryModifiableChatModel(FixedTemplateChainChatModel, MemoryModifiable):
-    def __init__(self, template, input_variables, stream=True):
-        self.__memorable_obj__ = ConversationBufferMemory(memory_key=MemoryUtil.MEMORY_KEY)
+    def __init__(self, template, input_variables, memorable, stream=True):
+        self.__memorable_obj__ = memorable
         super().__init__(template, input_variables, stream)
     def _memory_(self):
         return self.__memorable_obj__
@@ -27,26 +30,49 @@ class MemoryModifiableChatModel(FixedTemplateChainChatModel, MemoryModifiable):
 
 # 单agent封装
 class MonitorDecorator:
-    def __init__(self, template, input_variables, feedback_template, feedback_input_variables):
-        self.__agent__ = MemoryModifiableChatModel(template, input_variables, False)
-        self.__feedback__ = FixedTemplateChainChatModel(feedback_template, feedback_input_variables, False)
-        self.__common_memory__ = self.__agent__,
+    def __init__(self, template, input_variables, feedback_template, feedback_table: dict):
+        self.__common_memory__ = ConversationBufferMemory(memory_key=MemoryUtil.MEMORY_KEY)
+        self.__agent__ = MemoryModifiableChatModel(template, input_variables, self.__common_memory__, True)
+        self.__feedback_callable__ = FixedTemplateChainChatModel(feedback_template, list(["context", "ret"]), False)
+        self.__feedback_table__ = feedback_table
     def predict(self, **kwargs):
-        ret = self.__agent__.predict(**kwargs)
-        history = self.__common_memory__
-        mark = self.__feedback__.predict(context = history, text=ret)
-        if self.check_mark(mark):
-            pass
+        ret = InstanceUtil.get_chain(self.__agent__).predict(**kwargs)
+        context = self.__common_memory__
+        # 对应的回答key
+        key = self.__feedback_callable__.predict(context=context, ret=ret)
+        table = self.__feedback_table__
+        if key in table.keys():
+            table[key](self)
         else:
-            pass
-    def check_mark(self, mark):
-        pass
+            table['default'](self)
 
 class FeedbackAutoMachine:
-    def __init__(self, templates, input_variables_list, feedback_template, feedback_input_variables):
-        # self.__agent__ = MemoryModifiableChatModel(template, input_variables, False)
-        self.__feedback__ = FixedTemplateChainChatModel(feedback_template, feedback_input_variables, False)
+    def __init__(self, template_dict, input_variables_dict, feedback_template, feedback_table: dict):
+        self.__common_memory__ = ConversationBufferMemory(memory_key=MemoryUtil.MEMORY_KEY)
+        self.__agent_dict__ = dict()
+        for key in template_dict.keys():
+            self.__agent_dict__[key] = FixedTemplateChainChatModel(template_dict[key], input_variables_dict[key])
+        self.__feedback_callable__ = FixedTemplateChainChatModel(feedback_template, list(["context", "ret"]), False)
+        self.__feedback_table__ = feedback_table
         # self.__common_memory__ = self.__agent__,
+    def predict(self, **kwargs):
+        # 聊天策略
+        agent, mark = self.pop_policy()
+        if mark:
+            return agent.predict(**kwargs)
+        else:
+            ret = InstanceUtil.get_chain(agent).predict(**kwargs)
+            context = self.__common_memory__
+            # 对应的回答key
+            key = self.__feedback_callable__.predict(context=context, ret=ret)
+            table = self.__feedback_table__
+            if key in table.keys():
+                return table[key](self)
+            else:
+                return table['default'](self)
+
+    def pop_policy(self):
+        return self.__agent_dict__['default'], False
 
 
 

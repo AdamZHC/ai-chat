@@ -9,6 +9,14 @@ from langchain.chat_models import ChatOpenAI
 from flaskr.chatm import (
     prompted, memory, mfactory
 )
+
+from langchain.prompts import (
+    ChatPromptTemplate,
+    PromptTemplate,
+    SystemMessagePromptTemplate,
+    AIMessagePromptTemplate,
+    HumanMessagePromptTemplate,
+)
 from flaskr.serial import serial
 import asyncio
 from langchain.callbacks import AsyncIteratorCallbackHandler
@@ -36,8 +44,8 @@ class InitializedChatModel(ChatModel, ConfigRead.ConfigReader):
         self.__DEFAULT_TOKEN__ = self.property("token")
         self.__STREAM_MARK__ = stream
         # 回调处理接口
-        # os.environ["http_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
-        # os.environ["https_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
+        os.environ["http_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
+        os.environ["https_proxy"] = "http://127.0.0.1:{}".format(self.property("proxy_port"))
         self.__callable_obj__ = None
 
     @abstractmethod
@@ -134,11 +142,16 @@ class MultiTemplateChainChatModel(BaseChatModel, prompted.StaticPrompted):
 
 class FixedTemplateChainChatModel(ChainChatModel, prompted.SingletonPrompted):
 
-    def __init__(self, template, input_variables, stream=True):
+
+    def __init__(self, template, input_variables, stream=True, default_template=True):
         ChainChatModel.__init__(self, stream)
-        prompted.SingletonPrompted.__init__(self,
-                                            memory.MemoryUtil.add_prefix_template(template),
-                                            memory.MemoryUtil.add_prefix_input_variables(input_variables))
+        if default_template:
+            prompted.SingletonPrompted.__init__(self,
+                                                memory.MemoryUtil.add_prefix_template(template),
+                                                memory.MemoryUtil.add_prefix_input_variables(input_variables))
+        else:
+            # 这种情况父类为None
+            self.__template__ = PromptTemplate(template=template, input_variables=input_variables)
 
     def _template_(self):
         return self.__template__
@@ -200,10 +213,10 @@ if __name__ == '__main__':
     chat.predict(text='please give me a random number')
     # time.sleep(2)
     chat.predict(text='please add number one')
-    chat.predict(text='please add number one')
-    chat.predict(text='please add number one')
-    chat.predict(text='please add number one')
-    chat.predict(text='please add number one')
+    # chat.predict(text='please add number one')
+    # chat.predict(text='please add number one')
+    # chat.predict(text='please add number one')
+    # chat.predict(text='please add number one')
     # chat.predict(text='please add number one again')
     print(chat.__callable_obj__.memory)
     # loop = asyncio.get_event_loop()

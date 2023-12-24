@@ -64,3 +64,14 @@ class InstanceUtil:
             memory=src.memory,
         )
 
+    @staticmethod
+    def get_chain(src):
+        return LLMChain(
+            llm=ChatOpenAI(max_tokens=src.llm.max_tokens,
+                           openai_api_key=src.llm.openai_api_key,
+                           streaming=False),
+            verbose=True,
+            prompt=src.prompt,
+            memory=src.memory,
+        )
+
