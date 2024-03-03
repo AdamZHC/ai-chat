@@ -5,7 +5,7 @@ from queue import PriorityQueue
 
 # edges
 # (type, u, v)
-undefined = 1
+undefined = 1 << 0
 customer_provider, peer_peer, provider_customer = 1 << 2, 1 << 3, 1 << 4
 
 
