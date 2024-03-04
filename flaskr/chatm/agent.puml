@@ -1,0 +1,101 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+interface ABC
+interface ChatModel
+abstract ConfigReader
+abstract InitializedChatModel
+class BaseChatModel
+abstract ChainChatModel
+class LangChain
+abstract Prompted
+abstract SingletonPrompted
+class MultiTemplateChainChatModel
+class FixedTemplateChainChatModel
+class SerialChatModel
+interface Serializable
+
+
+
+ABC <|-- ChatModel
+ChatModel <|-- InitializedChatModel
+ConfigReader <|-- InitializedChatModel
+InitializedChatModel <|-- BaseChatModel
+OpenAIChatModel *-- BaseChatModel
+InitializedChatModel <|-- ChainChatModel
+LangChain *-- ChainChatModel
+OpenAIChatModel *-- LangChain
+Prompted <|-- MultiTemplateChainChatModel
+BaseChatModel <|-- MultiTemplateChainChatModel
+ChainChatModel <|-- FixedTemplateChainChatModel
+SingletonPrompted <|-- FixedTemplateChainChatModel
+FixedTemplateChainChatModel <|-- SerialChatModel
+Serializable <|-- SerialChatModel
+
+
+
+
+interface ChatModel {
+    {abstract}predict()
+}
+
+abstract ConfigReader {
+    #configure: object
+    +property()
+}
+
+abstract InitializedChatModel {
+    #configure: object
+    -init()
+    {abstract}predict()
+}
+class BaseChatModel {
+    #OpenAIChatModel : object
+    +predict()
+}
+
+abstract ChainChatModel {
+    #LangChain : object
+    {abstract}predict()
+}
+
+class LangChain {
+    -OpenAIChatModel
+    -memory
+    -VectorRepository
+    +get()
+}
+
+class OpenAIChatModel {
+    +predict()
+}
+
+class MultiTemplateChainChatModel {
+    +predict()
+}
+
+class FixedTemplateChainChatModel {
+    #memory
+    #template
+    +predict()
+}
+
+abstract SingletonPrompted {
+    +template()
+}
+
+class SerialChatModel {
+    -history
+    +predict()
+}
+
+interface Serializable {
+    {abstract}serialize()
+}
+
+interface Prompted {
+    +template()
+}
+
+
+@enduml
